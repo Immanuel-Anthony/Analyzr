@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Repositories</title>
+    <script>
+        async function analyzeRepo(form) {
+            const formData = new FormData(form);
+            const response = await fetch(form.action, {
+                method: 'POST',
+                body: formData
+            });
+            const result = await response.json();
+            const statusDiv = form.querySelector('.status');
+            if (result.status === 'success') {
+                statusDiv.innerHTML = `<p>${result.message} <a href="${result.download_url}" target="_blank">Download Report</a></p>`;
+            } else {
+                statusDiv.innerHTML = `<p>Error: ${result.error}</p>`;
+            }
+        }
+    </script>
+</head>
+<body>
+    <h1>Welcome, {{ user.name or user.username }}</h1>
+    <img src="{{ user.avatar_url }}" alt="User Avatar" style="width: 100px; border-radius: 50%;">
+    <h2>Your Repositories</h2>
+    {% if repos %}
+        <ul>
+            {% for repo in repos %}
+                <li>
+                    <a href="{{ repo.html_url }}" target="_blank">{{ repo.name }}</a>
+                    <form action="{{ url_for('analyze_repo') }}" method="post" onsubmit="event.preventDefault(); analyzeRepo(this);">
+                        <input type="hidden" name="repo_url" value="{{ repo.clone_url }}">
+                        <button type="submit">Analyze</button>
+                    </form>
+                    <div class="status"></div>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No repositories found.</p>
+    {% endif %}
+</body>
+</html>
