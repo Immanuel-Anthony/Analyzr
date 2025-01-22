@@ -1,0 +1,92 @@
+code_analysis_task:
+  description: >
+    Analyze this code: {code_to_analyze}. After analyzing the code,  After analyzing the code,  conduct a thorough analysis of the provided codebase. Identify inefficiencies, potential issues, and areas for improvement, ensuring the code adheres to industry standards and best practices.
+    Make sure to focus on readability, maintainability, and scalability.
+    GIVE ME Cognitive Complexity too.
+  expected_output: >
+    First give me the cognitive complexity of the code.
+    A list of 10 actionable recommendations for improving the codebase, categorized by issue type (e.g., performance, readability, scalability).   
+  agent: code_analysis
+
+code_security_task:
+  description: >   
+    Analyze this code: {code_to_analyze}. After analyzing the code,  After analyzing the code, review the provided codebase for potential security vulnerabilities. Identify any areas where security could be compromised and provide recommendations for mitigating risks.
+    Make sure to focus on common attack vectors such as SQL injection, cross-site scripting, and improper data handling.
+  expected_output: >
+    A detailed report of potential security vulnerabilities with recommendations for fixing them. The report should also include suggestions for improving overall code security practices.
+  agent: code_security
+
+code_optimization_task:
+  description: >    
+    Analyze this code: {code_to_analyze}. After analyzing the code, analyze the provided codebase for performance bottlenecks. Identify inefficient algorithms, data structures, and any resource-intensive sections of the code.
+    Provide suggestions for optimizing the code to improve execution speed and resource utilization without sacrificing readability.
+  expected_output: >    
+    A list of 10 optimization suggestions, prioritized by impact, including refactored code snippets where applicable.
+  agent: code_optimization
+
+code_test_coverage_task:
+  description: >
+    Analyze this code: {code_to_analyze}. After analyzing the code,  After analyzing the code, review the existing test coverage for the provided codebase. Identify areas with insufficient test coverage and recommend additional test cases to ensure full coverage.
+    Focus on unit tests, integration tests, and edge cases to ensure robustness.
+  expected_output: >
+    A detailed list of areas lacking sufficient test coverage, along with recommendations for additional test cases and strategies to improve test coverage.
+  agent: code_test_coverage
+
+documentation_task:
+  description: >
+    Important : Do NOT include the original code in the output
+    Analyze this code: {code_to_analyze}. After analyzing the code,  After analyzing the code, review the provided codebase and generate comprehensive documentation. Ensure that all key components of the code are explained clearly, including usage instructions, function descriptions, and any setup requirements.
+    The documentation should be structured for easy readability and reference by future developers or users.
+  expected_output: >
+    Important : Do NOT include the original code in the output
+    A fully structured documentation in markdown format, detailing the purpose and functionality of the key components of the codebase. Include examples, setup instructions, and best practices.
+  agent: documentation
+
+final_report_task:
+  description: >
+    Create a comprehensive master report by analyzing and synthesizing the outputs from all previous agents.
+    Use the following data as input:
+    - Code Analysis: {code_analysis_output}
+    - Security Analysis: {security_analysis_output}
+    - Performance Analysis: {performance_analysis_output}
+    - Code Test Coverage : {code_test_output}
+    - Best Practices Analysis: {best_practices_output}
+
+    Create a well-structured document with the following sections:
+    1. Executive Summary
+    2. Code Quality Analysis
+    3. Security Assessment
+    4. Performance Evaluation
+    5. Code Test Coverage
+    6. Best Practices Compliance
+    7. Consolidated Recommendations
+    8. Action Items (Prioritized)
+    9. Risk Assessment
+
+    Format the document professionally and include proper headings, sections, and formatting.
+  expected_output: >
+    A comprehensive, well-formatted report document that synthesizes all analyses into a cohesive, actionable document.
+    The report should be saved in both Markdown and PDF formats.
+  agent: report_aggregator
+  dependencies: [code_analysis_task, code_security_task, code_optimization_task, code_test_coverage_task]
+
+report_beautifier_task:
+  description: >
+    Take this report and beautify it for human readability:
+    {final_report_task}
+    
+    Make it look professional by:
+    1. Ensuring consistent formatting and spacing
+    2. Organizing sections with clear headers
+    3. Making lists and code blocks easily readable
+    4. Removing any technical artifacts or unwanted characters
+    5. Adding proper paragraph breaks where needed
+    6. Do not include Output Formats.
+    7. Make the document detailed
+    8. List out any error or flaw found in the codes too, along with feedback
+
+    Finally, format this as a professional document that's ready to be saved as a DOCX file.
+  expected_output: >
+    A beautifully formatted, professional report ready for DOCX conversion.
+  agent: report_beautifier
+  dependencies: [final_report_task]

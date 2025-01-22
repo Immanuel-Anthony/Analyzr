@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Code Analysis System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+        }
+        .github-button {
+            background-color: #24292e;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+        }
+        .github-button:hover {
+            background-color: #1a1f23;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Code Analysis System</h1>
+        <a href="{{ url_for('github_login') }}" class="github-button">
+            Login with GitHub
+        </a>
+    </div>
+</body>
+</html>
