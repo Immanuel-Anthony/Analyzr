@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Download Analysis Report</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background-color: #0f1318;
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+        }
+
+        .download-container {
+            text-align: center;
+        }
+
+        .title {
+            font-size: 1.8rem;
+            margin-bottom: 2rem;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .status-text {
+            font-size: 1.2rem;
+            margin-bottom: 3rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .download-button {
+            background: linear-gradient(to right, #64a5ff, #8b6fff);
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            color: white;
+            font-weight: 500;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .download-button:hover {
+            opacity: 0.9;
+        }
+
+        .download-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .back-button {
+            position: absolute;
+            top: 2rem;
+            left: 2rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .back-button:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+    </style>
+</head>
+<body>
+    <button class="back-button" onclick="window.location.href='/repositories'">← Back to Repositories</button>
+    
+    <div class="download-container">
+        <h1 class="title">Analysis Complete!</h1>
+        <p class="status-text">Your report is ready for download</p>
+        <button id="download-button" class="download-button">Download Report</button>
+    </div>
+
+    <script>
+        const downloadButton = document.getElementById('download-button');
+        downloadButton.onclick = async () => {
+            downloadButton.disabled = true;
+            const originalText = downloadButton.textContent;
+            downloadButton.textContent = 'Downloading...';
+            
+            try {
+                const response = await fetch('/download-report');
+                console.log('Response status:', response.status);
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`Download failed: ${response.status} - ${errorText}`);
+                }
+                
+                const blob = await response.blob();
+                if (blob.size === 0) {
+                    throw new Error('Received empty file');
+                }
+                
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = url;
+                
+                const contentDisposition = response.headers.get('Content-Disposition');
+                const filenameMatch = contentDisposition && contentDisposition.match(/filename="(.+)"/);
+                a.download = filenameMatch ? filenameMatch[1] : 'code_analysis_report.docx';
+                
+                document.body.appendChild(a);
+                a.click();
+                
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+                
+            } catch (error) {
+                console.error('Download error:', error);
+                alert(`Failed to download the report: ${error.message}`);
+            } finally {
+                downloadButton.disabled = false;
+                downloadButton.textContent = originalText;
+            }
+        };
+    </script>
+</body>
+</html>

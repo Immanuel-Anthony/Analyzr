@@ -3,13 +3,23 @@ from functools import wraps
 import requests
 import os
 from dotenv import load_dotenv
+from datetime import datetime
 from main import run_terminal  # Ensure the import path is correct
 import tempfile
 from pathlib import Path
 import shutil
+import threading
+import time
+import logging
 
 # Load environment variables
 load_dotenv()
+
+# Dictionary to track analysis statuses
+analysis_status = {}
+
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 app.secret_key = os.getenv('FLASK_SECRET_KEY', 'your-secret-key-here')  # Change this in production
@@ -27,6 +37,90 @@ def login_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
+def analyze_repository(repo_name, repo_url):
+    global analysis_status
+    analysis_status[repo_name] = "in_progress"
+    try:
+        run_terminal(github_url=repo_url)
+        analysis_status[repo_name] = "completed"
+    except Exception as e:
+        print(f"Error analyzing {repo_name}: {e}")
+        analysis_status[repo_name] = "failed"
+
+def get_latest_docx():
+    """
+    Find the most recently created .docx file in the reports directory
+    """
+    try:
+        # Get the current file's directory
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        
+        # Go directly to the reports directory
+        reports_dir = os.path.join(current_dir, 'reports')
+        
+        logger.debug(f"Looking for .docx files in: {reports_dir}")
+        
+        if not os.path.exists(reports_dir):
+            logger.error(f"Reports directory not found: {reports_dir}")
+            return None
+            
+        docx_files = []
+        # Walk through the reports directory
+        for root, _, files in os.walk(reports_dir):
+            for file in files:
+                if file.endswith('.docx'):
+                    full_path = os.path.join(root, file)
+                    docx_files.append((full_path, os.path.getctime(full_path)))
+                    logger.debug(f"Found docx file: {full_path}")
+        
+        if not docx_files:
+            logger.warning("No .docx files found in reports directory")
+            return None
+        
+        # Sort by creation time and get the most recent
+        latest_file = max(docx_files, key=lambda x: x[1])[0]
+        logger.info(f"Latest docx file found: {latest_file}")
+        return latest_file
+        
+    except Exception as e:
+        logger.error(f"Error in get_latest_docx: {str(e)}")
+        return None
+
+@app.route('/download-report')
+@login_required
+def download_report():
+    try:
+        latest_docx = get_latest_docx()
+        
+        if latest_docx is None:
+            logger.error("No report file found")
+            return "No report found", 404
+            
+        if not os.path.exists(latest_docx):
+            logger.error(f"Report file does not exist: {latest_docx}")
+            return "Report file not found", 404
+            
+        logger.info(f"Attempting to send file: {latest_docx}")
+        
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        filename = f"code_analysis_report_{timestamp}.docx"
+        
+        try:
+            return send_file(
+                latest_docx,
+                as_attachment=True,
+                download_name=filename,
+                mimetype='application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+            )
+        except Exception as e:
+            logger.error(f"Error sending file: {str(e)}")
+            return f"Error sending file: {str(e)}", 500
+            
+    except Exception as e:
+        logger.error(f"Error in download_report: {str(e)}")
+        return f"Error downloading report: {str(e)}", 500
+
+
 @app.route('/login')
 def login():
     if 'github_token' in session:
@@ -37,6 +131,49 @@ def login():
 def github_login():
     github_auth_url = f'https://github.com/login/oauth/authorize?client_id={GITHUB_CLIENT_ID}&redirect_uri={GITHUB_REDIRECT_URI}&scope=repo'
     return redirect(github_auth_url)
+
+@app.route('/')
+@login_required
+def index():
+    user_data = session.get('user_data', {})
+    return render_template('index.html', user=user_data)
+
+
+@app.route('/analyze_repo', methods=['POST'])
+@login_required
+def analyze_repo():
+    data = request.json
+    repo_url = data.get('repo_url')
+    if not repo_url:
+        return jsonify({'status': 'error', 'error': 'No repository URL provided'}), 400
+
+    repo_name = repo_url.split('/')[-1].replace('.git', '')
+
+    if repo_name not in analysis_status or analysis_status[repo_name] in ["not_started", "failed"]:
+        try:
+            # Pass repo_name and repo_url to the thread
+            thread = threading.Thread(target=analyze_repository, args=(repo_name, repo_url))
+            thread.start()
+            return jsonify({'status': 'success', 'message': f'Analysis started for {repo_name}.'})
+        except Exception as e:
+            print(f"Error starting analysis thread: {e}")
+            return jsonify({'status': 'error', 'error': 'Failed to start analysis'}), 500
+
+    return jsonify({'status': 'error', 'error': 'Analysis already in progress or completed'}), 400
+
+
+@app.route('/analyzing')
+@login_required
+def analyzing():
+    repo_name = request.args.get('repo', 'repository')
+    return render_template('analysis.html', repo_name=repo_name)
+
+@app.route('/analysis-status')
+@login_required
+def analysis_status_endpoint():
+    repo_name = request.args.get('repo')
+    status = analysis_status.get(repo_name, "not_started")
+    return jsonify({"status": status})
 
 @app.route('/github-callback')
 def github_callback():
@@ -115,65 +252,6 @@ def repositories():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-
-import logging
-logging.basicConfig(level=logging.DEBUG)
-
-@app.route('/analyze-repo', methods=['POST'])
-@login_required
-def analyze_repo():
-    try:
-        repo_url = request.form.get('repo_url')
-        if not repo_url:
-            return jsonify({'error': 'No repository URL provided'}), 400
-
-        # Analyze the repository
-        output_dir = tempfile.mkdtemp()
-        try:
-            run_terminal(github_url=repo_url)
-
-            # Create a dummy report file for demonstration purposes
-            report_path = Path(output_dir) / "report.txt"
-            with open(report_path, 'w') as report_file:
-                report_file.write(f"Analysis completed for repository: {repo_url}\n")
-
-            # Move report to a static directory
-            permanent_dir = Path('static/reports')
-            permanent_dir.mkdir(parents=True, exist_ok=True)
-            permanent_report_path = permanent_dir / report_path.name
-            shutil.move(str(report_path), str(permanent_report_path))
-
-            # Store the path in the session for downloading
-            session['report_path'] = str(permanent_report_path)
-
-            return jsonify({
-                'status': 'success',
-                'message': f'Analysis completed for {repo_url}.',
-                'download_url': url_for('download_report')
-            })
-        finally:
-            if os.path.exists(output_dir):
-                shutil.rmtree(output_dir, ignore_errors=True)
-
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-@app.route('/download-report')
-@login_required
-def download_report():
-    try:
-        report_path = session.get('report_path')
-        if not report_path or not os.path.exists(report_path):
-            return jsonify({'error': 'No report available for download'}), 400
-
-        return send_file(
-            report_path,
-            as_attachment=True,
-            download_name=os.path.basename(report_path)
-        )
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
 @app.route('/logout')
 def logout():
     session.clear()
@@ -181,16 +259,3 @@ def logout():
 
 if __name__ == '__main__':
     app.run(debug=True)
-
-
-#Added repositories.html file to try and make a list of the repositories along with an analyze button. No frontend
-#app2 is the testing version of the program
-#DO NOT make changes to app.py . Use app2.py
-
-
-#Fixes to be done
-#Repositories needs a bit of frontend
-#The download-report url is not being redirected to
-#Download button not showing up , have to change the url manually
-#No landing page in the new program
-#Output is not proper. its downloading a text file, not a docx file

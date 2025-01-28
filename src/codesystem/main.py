@@ -10,21 +10,35 @@ from dotenv import load_dotenv  # Import dotenv for .env file loading
 
 # Load environment variables from .env
 load_dotenv()
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
+if not GITHUB_TOKEN:
+    raise ValueError("GITHUB_TOKEN is not set. Please define it in your .env file.")
 
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 if not OPENAI_API_KEY:
     raise ValueError("OPENAI_API_KEY is not set. Please define it in your .env file.")
 
+
 def clone_github_repo(github_url):
     """
-    Clone a GitHub repository and return the local path.
+    Clone a GitHub repository using authentication.
     """
     temp_dir = tempfile.mkdtemp()
     try:
-        git.Repo.clone_from(github_url, temp_dir)
+        # Add access token to the repo URL
+        token = os.getenv("GITHUB_TOKEN")
+        if not token:
+            raise ValueError("GITHUB_TOKEN is not set in the environment.")
+        
+        # Modify URL to include token for private repos
+        auth_url = github_url.replace("https://", f"https://{token}@")
+        print(f"Cloning repository from URL: {auth_url}")  # Debug log
+        
+        git.Repo.clone_from(auth_url, temp_dir)
         return temp_dir
     except Exception as e:
         raise Exception(f"Error cloning repository: {e}")
+
 
 def get_code_files(repo_path):
     """
