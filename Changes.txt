@@ -1,3 +1,31 @@
-Things to change 
+Changes done - 28/01/2025
+
+Added landing page on app2
+Formatted the login page
 
 
+Changes done - 29/01/2025
+
+Formatted the repo list page
+Formatted the analyzing page
+Formatted the download page
+Connected the analysis part with the analysis part
+
+
+
+#To Be done - As of 29/01/2025
+
+We need to add a LOG OUT button on the top right of the page.
+
+When you click on download button, it downloads the latest docx, even if it is not the same as the repo which is being analyzed.
+-Make it so that it only downloads a document once and then when you analyze another repo, it will download the repo you analyzed just now
+
+Need to make the loading screen appear again : When you analyze something and then analyze something else, it does not show you the loading bar
+-Im assuming because the variable in the app2.py file (analysis_status = {} I guess) is making it so that it wont show up
+
+Change the landing page so that it shows either login to github or just enter a url. Rn it shows you logged in and also shows url
+-Does not show url part when you are not logged in.
+
+UI PART :
+I think we can make the repo list page better looking
+I think we can add more stuff to the download and analysis page
