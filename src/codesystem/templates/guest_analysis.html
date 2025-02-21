@@ -90,10 +90,7 @@
             cursor: not-allowed;
         }
 
-        .back-button {
-            position: absolute;
-            top: 2rem;
-            left: 2rem;
+        .home-button {
             background: rgba(255, 255, 255, 0.1);
             border: none;
             padding: 0.5rem 1rem;
@@ -101,9 +98,12 @@
             color: white;
             cursor: pointer;
             transition: background-color 0.2s;
+            text-decoration: none;
+            display: inline-block;
+            margin-top: 1rem;
         }
 
-        .back-button:hover {
+        .home-button:hover {
             background: rgba(255, 255, 255, 0.15);
         }
 
@@ -117,8 +117,6 @@
     </style>
 </head>
 <body>
-    <button class="back-button" onclick="window.location.href='/repositories'">← Back to Repositories</button>
-    
     <div class="container">
         <div class="loading-section active">
             <h1 class="title">Analyzing Repository</h1>
@@ -133,6 +131,8 @@
             <p id="message-text" class="message-text"></p>
             <p class="status-text">Your report is ready for download</p>
             <button id="download-button" class="download-button" style="display: inline-block;">Download Report</button>
+            <br>
+            <a href="/" class="home-button">Back to Home</a>
         </div>
     </div>
 
@@ -167,7 +167,7 @@
                     messageText.textContent = ''; // Clear message for fresh analysis
                 } else if (data.status === 'failed') {
                     alert('Analysis failed. Please try again.');
-                    window.location.href = '/repositories';
+                    window.location.href = '/';
                 } else if (data.status === 'in_progress') {
                     setTimeout(checkAnalysisStatus, 2000); // Check again in 2 seconds
                 }
@@ -208,10 +208,11 @@
                 const contentDisposition = response.headers.get('Content-Disposition');
                 let filename = `${repoName}_Analysis.docx`;  // default filename
                 
-                // Try to get filename from Content-Disposition header if available
-                const filenameMatch = contentDisposition && contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
-                if (filenameMatch && filenameMatch[1]) {
-                    filename = filenameMatch[1].replace(/['"]/g, '');
+                if (contentDisposition) {
+                    const filenameMatch = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
+                    if (filenameMatch && filenameMatch[1]) {
+                        filename = filenameMatch[1].replace(/['"]/g, '');
+                    }
                 }
                 
                 a.download = filename;
@@ -229,7 +230,6 @@
                 downloadButton.textContent = originalText;
             }
         };
-
     </script>
 </body>
 </html>

@@ -31,6 +31,13 @@
             margin-bottom: 3rem;
         }
 
+        .profile-info {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            flex: 1;
+        }
+
         .profile-section img {
             width: 80px;
             height: 80px;
@@ -90,6 +97,22 @@
             opacity: 0.9;
         }
 
+        .logout-button {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            color: white;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .logout-button:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
         .status {
             margin-top: 0.5rem;
         }
@@ -109,10 +132,20 @@
                 gap: 1rem;
                 align-items: flex-start;
             }
+
+            .profile-section {
+                flex-direction: column;
+                align-items: flex-start;
+                text-align: center;
+            }
+
+            .profile-info {
+                flex-direction: column;
+                align-items: center;
+            }
         }
     </style>
     <script>
-
         async function analyzeRepo(form) {
             const formData = new FormData(form);
             const repoUrl = formData.get('repo_url');
@@ -125,30 +158,47 @@
                     body: JSON.stringify({ repo_url: repoUrl })
                 });
         
-                if (response.ok) {
-                    // Redirect to the analysis status page
-                    window.location.href = `/analyzing?repo=${encodeURIComponent(repoName)}`;
-                } else {
-                    const result = await response.json();
-                    console.error("Error response from server:", result);  // Debugging
-                    const statusDiv = form.querySelector('.status');
-                    statusDiv.innerHTML = `<p>Error: ${result.error}</p>`;
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+        
+                const result = await response.json();
+                
+                switch(result.status) {
+                    case 'already_analyzed':
+                        if (confirm('This repository has already been analyzed. Would you like to view the existing report?')) {
+                            window.location.href = `/analyzing?repo=${encodeURIComponent(result.repo_name)}&status=completed`;
+                        }
+                        break;
+                    
+                    case 'in_progress':
+                        window.location.href = `/analyzing?repo=${encodeURIComponent(result.repo_name)}`;
+                        break;
+                    
+                    case 'started':
+                        window.location.href = `/analyzing?repo=${encodeURIComponent(result.repo_name)}`;
+                        break;
+                    
+                    default:
+                        const statusDiv = form.querySelector('.status');
+                        statusDiv.innerHTML = `<p>Error: Unexpected response from server</p>`;
                 }
             } catch (error) {
-                console.error("Request failed:", error);  // Debugging
+                console.error("Request failed:", error);
                 const statusDiv = form.querySelector('.status');
                 statusDiv.innerHTML = `<p>Error: Failed to start analysis</p>`;
             }
         }
-        
-
     </script>
 </head>
 <body>
     <div class="container">
         <div class="profile-section">
-            <img src="{{ user.avatar_url }}" alt="User Avatar">
-            <h1>Welcome, {{ user.name or user.username }}</h1>
+            <div class="profile-info">
+                <img src="{{ user.avatar_url }}" alt="User Avatar">
+                <h1>Welcome, {{ user.name or user.username }}</h1>
+            </div>
+            <a href="{{ url_for('logout') }}" class="logout-button">Logout</a>
         </div>
         
         <h2>Your Repositories</h2>

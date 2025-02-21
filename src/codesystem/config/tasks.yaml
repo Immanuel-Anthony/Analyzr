@@ -52,6 +52,10 @@ final_report_task:
     - Code Test Coverage : {code_test_output}
     - Best Practices Analysis: {best_practices_output}
 
+    Format the document professionally and include proper headings, sections, and formatting.
+  expected_output: >
+    A comprehensive, well-formatted report document that synthesizes all analyses into a cohesive, actionable document in the following format only :
+    
     Create a well-structured document with the following sections:
     1. Executive Summary
     2. Code Quality Analysis
@@ -63,10 +67,6 @@ final_report_task:
     8. Action Items (Prioritized)
     9. Risk Assessment
 
-    Format the document professionally and include proper headings, sections, and formatting.
-  expected_output: >
-    A comprehensive, well-formatted report document that synthesizes all analyses into a cohesive, actionable document.
-    The report should be saved in both Markdown and PDF formats.
   agent: report_aggregator
   dependencies: [code_analysis_task, code_security_task, code_optimization_task, code_test_coverage_task]
 
