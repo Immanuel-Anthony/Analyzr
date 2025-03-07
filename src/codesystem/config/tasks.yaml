@@ -44,19 +44,18 @@ documentation_task:
 
 final_report_task:
   description: >
-    Create a comprehensive master report by analyzing and synthesizing the outputs from all previous agents.
+    Generate a comprehensive master report by analyzing and synthesizing the outputs from all previous agents.
     Use the following data as input:
     - Code Analysis: {code_analysis_output}
     - Security Analysis: {security_analysis_output}
     - Performance Analysis: {performance_analysis_output}
-    - Code Test Coverage : {code_test_output}
+    - Code Test Coverage: {code_test_output}
     - Best Practices Analysis: {best_practices_output}
 
-    Format the document professionally and include proper headings, sections, and formatting.
+    Ensure that all reports follow a standardized structure with consistent headings, subheadings, and formatting.
+
   expected_output: >
-    A comprehensive, well-formatted report document that synthesizes all analyses into a cohesive, actionable document in the following format only :
-    
-    Create a well-structured document with the following sections:
+    A structured and standardized report containing the following sections:
     1. Executive Summary
     2. Code Quality Analysis
     3. Security Assessment
@@ -67,26 +66,23 @@ final_report_task:
     8. Action Items (Prioritized)
     9. Risk Assessment
 
+    The structure, formatting, and section order must remain consistent across all generated reports.
+
   agent: report_aggregator
   dependencies: [code_analysis_task, code_security_task, code_optimization_task, code_test_coverage_task]
 
 report_beautifier_task:
   description: >
-    Take this report and beautify it for human readability:
-    {final_report_task}
-    
-    Make it look professional by:
-    1. Ensuring consistent formatting and spacing
-    2. Organizing sections with clear headers
-    3. Making lists and code blocks easily readable
-    4. Removing any technical artifacts or unwanted characters
-    5. Adding proper paragraph breaks where needed
-    6. Do not include Output Formats.
-    7. Make the document detailed
-    8. List out any error or flaw found in the codes too, along with feedback
+    Enhance the final report for readability and professionalism while maintaining consistency in structure and formatting.
+    - Ensure uniform formatting and spacing across all sections.
+    - Standardize headers and subheadings to match the predefined structure.
+    - Organize content with clear paragraphs, lists, and readable formatting.
+    - Remove unwanted artifacts, technical residues, or inconsistencies.
+    - Maintain the exact document structure for consistency across all reports.
+    - Clearly list any identified errors or flaws in the code, along with constructive feedback.
 
-    Finally, format this as a professional document that's ready to be saved as a DOCX file.
   expected_output: >
-    A beautifully formatted, professional report ready for DOCX conversion.
+    A professionally formatted and standardized report ready for DOCX conversion, following the predefined structure without deviations.
+
   agent: report_beautifier
   dependencies: [final_report_task]

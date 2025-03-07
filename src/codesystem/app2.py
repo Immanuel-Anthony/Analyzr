@@ -330,7 +330,8 @@ def logout():
             logger.error(f"Error revoking token: {e}")
     
     session.clear()
-    return redirect(url_for('login', t=int(time.time())))
+    return redirect('/')
+
 
 if __name__ == '__main__':
     app.run(debug=True)

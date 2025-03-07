@@ -3,154 +3,324 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Repositories</title>
+    <title>GitHub Repositories</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: system-ui, -apple-system, sans-serif;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
         }
 
         body {
-            background-color: #0f1318;
-            color: white;
+            background: linear-gradient(135deg, #0B0C10 0%, #1F2833 100%);
+            position: relative;
+            color: #E2E8F0;
             min-height: 100vh;
             padding: 2rem;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at center, rgba(102, 252, 241, 0.1) 0%, transparent 50%);
+            animation: aurora 15s linear infinite;
+            z-index: 0;
+        }
+
+        @keyframes aurora {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
 
         .container {
+            position: relative;
             max-width: 1000px;
             margin: 0 auto;
+            padding: 2rem;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 24px;
+            backdrop-filter: blur(20px);
+            box-shadow: 
+                0 8px 32px rgba(0, 0, 0, 0.2),
+                inset 0 0 2px rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .profile-section {
             display: flex;
             align-items: center;
-            gap: 1.5rem;
+            justify-content: space-between;
             margin-bottom: 3rem;
+            padding-bottom: 2rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .profile-info {
             display: flex;
             align-items: center;
             gap: 1.5rem;
-            flex: 1;
         }
 
         .profile-section img {
-            width: 80px;
-            height: 80px;
+            width: 90px;
+            height: 90px;
             border-radius: 50%;
-            border: 2px solid rgba(255, 255, 255, 0.1);
+            border: 3px solid rgba(102, 252, 241, 0.5);
+            box-shadow: 
+                0 0 20px rgba(102, 252, 241, 0.2),
+                inset 0 0 20px rgba(102, 252, 241, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .profile-section img:hover {
+            transform: scale(1.05);
+            border-color: rgba(102, 252, 241, 0.8);
+            box-shadow: 
+                0 0 30px rgba(102, 252, 241, 0.3),
+                inset 0 0 30px rgba(102, 252, 241, 0.2);
         }
 
         h1 {
-            font-size: 1.8rem;
-            font-weight: 500;
-            color: rgba(255, 255, 255, 0.9);
+            font-size: 2rem;
+            font-weight: 600;
+            color: #FFFFFF;
+            text-shadow: 0 2px 10px rgba(102, 252, 241, 0.2);
         }
 
         h2 {
             font-size: 1.5rem;
             margin-bottom: 2rem;
-            color: rgba(255, 255, 255, 0.8);
+            color: #66FCF1;
+            font-weight: 500;
+            text-shadow: 0 0 10px rgba(102, 252, 241, 0.3);
         }
 
         .repo-list {
             list-style: none;
+            display: grid;
+            gap: 1rem;
+            margin-bottom: 2rem;
         }
 
         .repo-item {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 12px;
-            padding: 1.25rem;
-            margin-bottom: 1rem;
+            background: rgba(31, 40, 51, 0.4);
+            border-radius: 16px;
+            padding: 1.5rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(102, 252, 241, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .repo-item:hover {
+            transform: translateY(-2px);
+            background: rgba(31, 40, 51, 0.6);
+            border-color: rgba(102, 252, 241, 0.3);
+            box-shadow: 
+                0 8px 32px rgba(0, 0, 0, 0.2),
+                0 0 15px rgba(102, 252, 241, 0.1);
         }
 
         .repo-link {
-            color: #fff;
+            color: #66FCF1;
             text-decoration: none;
             font-size: 1.1rem;
-            transition: color 0.2s;
+            font-weight: 500;
+            transition: all 0.2s;
+            text-shadow: 0 0 10px rgba(102, 252, 241, 0.2);
         }
 
         .repo-link:hover {
-            color: rgba(255, 255, 255, 0.8);
+            color: #ffffff;
+            text-shadow: 0 0 15px rgba(102, 252, 241, 0.4);
         }
 
         .analyze-button {
-            background: linear-gradient(to right, #64a5ff, #8b6fff);
+            background: linear-gradient(135deg, rgba(102, 252, 241, 0.8) 0%, rgba(69, 162, 158, 0.8) 100%);
             border: none;
             padding: 0.75rem 1.5rem;
-            border-radius: 8px;
-            color: white;
-            font-weight: 500;
+            border-radius: 12px;
+            color: #0B0C10;
+            font-weight: 600;
             cursor: pointer;
-            transition: opacity 0.2s;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
         }
 
         .analyze-button:hover {
-            opacity: 0.9;
+            transform: translateY(-1px);
+            background: linear-gradient(135deg, rgba(102, 252, 241, 1) 0%, rgba(69, 162, 158, 1) 100%);
+            box-shadow: 0 0 20px rgba(102, 252, 241, 0.3);
+        }
+
+        .analyze-button:disabled {
+            background: rgba(102, 252, 241, 0.3);
+            cursor: not-allowed;
+            opacity: 0.7;
         }
 
         .logout-button {
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            padding: 0.5rem 1rem;
-            border-radius: 6px;
-            color: white;
+            background: transparent;
+            border: 2px solid rgba(102, 252, 241, 0.5);
+            padding: 0.75rem 1.5rem;
+            border-radius: 12px;
+            color: #66FCF1;
             text-decoration: none;
-            font-size: 0.9rem;
-            transition: all 0.2s;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
         }
 
         .logout-button:hover {
-            background: rgba(255, 255, 255, 0.15);
-            border-color: rgba(255, 255, 255, 0.3);
+            background: rgba(102, 252, 241, 0.1);
+            border-color: rgba(102, 252, 241, 1);
+            color: #ffffff;
+            transform: translateY(-1px);
+            box-shadow: 0 0 20px rgba(102, 252, 241, 0.2);
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .page-button {
+            background: rgba(31, 40, 51, 0.4);
+            border: 1px solid rgba(102, 252, 241, 0.3);
+            color: #66FCF1;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+        }
+
+        .page-button:hover {
+            background: rgba(102, 252, 241, 0.1);
+            transform: translateY(-1px);
+        }
+
+        .page-button.active {
+            background: rgba(102, 252, 241, 0.8);
+            color: #0B0C10;
+            border-color: transparent;
+            box-shadow: 0 0 15px rgba(102, 252, 241, 0.3);
         }
 
         .status {
             margin-top: 0.5rem;
+            font-size: 0.9rem;
+            color: #ff6b6b;
         }
 
-        .status a {
-            color: #64a5ff;
-            text-decoration: none;
-        }
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem;
+            }
 
-        .status a:hover {
-            text-decoration: underline;
-        }
+            .container {
+                padding: 1.5rem;
+            }
 
-        @media (max-width: 640px) {
+            .profile-section {
+                flex-direction: column;
+                gap: 1.5rem;
+                align-items: flex-start;
+            }
+
             .repo-item {
                 flex-direction: column;
                 gap: 1rem;
                 align-items: flex-start;
             }
 
-            .profile-section {
-                flex-direction: column;
-                align-items: flex-start;
-                text-align: center;
-            }
-
-            .profile-info {
-                flex-direction: column;
-                align-items: center;
+            h1 {
+                font-size: 1.5rem;
             }
         }
     </style>
+</head>
+<body>
+    <div class="container">
+        <div class="profile-section">
+            <div class="profile-info">
+                <img src="{{ user.avatar_url }}" alt="User Avatar">
+                <h1>Welcome, {{ user.name or user.username }}</h1>
+            </div>
+            <a href="{{ url_for('logout') }}" class="logout-button">Logout</a>
+        </div>
+
+        <h2>Your Repositories</h2>
+
+        {% if repos %}
+            {% set items_per_page = 6 %}
+            {% set current_page = request.args.get('page', 1) | int %}
+            {% set total_pages = ((repos|length - 1) // items_per_page) + 1 %}
+            {% set start_idx = (current_page - 1) * items_per_page %}
+            {% set end_idx = start_idx + items_per_page %}
+            
+            <ul class="repo-list">
+                {% for repo in repos[start_idx:end_idx] %}
+                    <li class="repo-item">
+                        <a href="{{ repo.html_url }}" target="_blank" class="repo-link">{{ repo.name }}</a>
+                        <form action="{{ url_for('analyze_repo') }}" method="post" onsubmit="event.preventDefault(); analyzeRepo(this);">
+                            <input type="hidden" name="repo_url" value="{{ repo.clone_url }}">
+                            <button type="submit" class="analyze-button">Analyze</button>
+                            <div class="status"></div>
+                        </form>
+                    </li>
+                {% endfor %}
+            </ul>
+
+            <div class="pagination">
+                {% if current_page > 1 %}
+                    <a href="?page={{ current_page - 1 }}" class="page-button">Previous</a>
+                {% endif %}
+                
+                {% for page in range(1, total_pages + 1) %}
+                    <a href="?page={{ page }}" class="page-button {% if page == current_page %}active{% endif %}">
+                        {{ page }}
+                    </a>
+                {% endfor %}
+                
+                {% if current_page < total_pages %}
+                    <a href="?page={{ current_page + 1 }}" class="page-button">Next</a>
+                {% endif %}
+            </div>
+        {% else %}
+            <p>No repositories found.</p>
+        {% endif %}
+    </div>
     <script>
+        let isAnalyzing = false; // Global flag to track analysis status
+
         async function analyzeRepo(form) {
+            if (isAnalyzing) {
+                form.querySelector('.status').innerHTML = `<p style="color: #ff6b6b;">Another analysis is already in progress. Please wait...</p>`;
+                return;
+            }
+        
+            isAnalyzing = true; // Set the flag to true when analysis starts
+            const analyzeButtons = document.querySelectorAll('.analyze-button');
+            analyzeButtons.forEach(button => button.disabled = true); // Disable all Analyze buttons
+            form.querySelector('.status').innerHTML = `<p style="color: #66FCF1;">Analyzing repository...</p>`;
+        
             const formData = new FormData(form);
             const repoUrl = formData.get('repo_url');
-            const repoName = repoUrl.split('/').pop().replace('.git', '');
-        
+            
             try {
                 const response = await fetch(form.action, {
                     method: 'POST',
@@ -163,62 +333,36 @@
                 }
         
                 const result = await response.json();
-                
-                switch(result.status) {
-                    case 'already_analyzed':
-                        if (confirm('This repository has already been analyzed. Would you like to view the existing report?')) {
-                            window.location.href = `/analyzing?repo=${encodeURIComponent(result.repo_name)}&status=completed`;
-                        }
-                        break;
-                    
-                    case 'in_progress':
-                        window.location.href = `/analyzing?repo=${encodeURIComponent(result.repo_name)}`;
-                        break;
-                    
-                    case 'started':
-                        window.location.href = `/analyzing?repo=${encodeURIComponent(result.repo_name)}`;
-                        break;
-                    
-                    default:
-                        const statusDiv = form.querySelector('.status');
-                        statusDiv.innerHTML = `<p>Error: Unexpected response from server</p>`;
+        
+                if (result.status === 'error') {
+                    form.querySelector('.status').innerHTML = `<p style="color: #ff6b6b;">${result.error}</p>`;
+                    return;
+                }
+        
+                // Handle already analyzed repositories
+                if (result.status === 'already_analyzed') {
+                    window.location.href = `/analyzing?repo=${encodeURIComponent(result.repo_name)}&status=completed`;
+                    return;
+                }
+        
+                // Handle analysis in progress
+                if (result.status === 'in_progress') {
+                    form.querySelector('.status').innerHTML = `<p style="color: #ff6b6b;">${result.message}</p>`;
+                    return;
+                }
+        
+                // Redirect to the analysis page only if the analysis is started successfully
+                if (result.status === 'started') {
+                    window.location.href = `/analyzing?repo=${encodeURIComponent(result.repo_name)}&status=started`;
                 }
             } catch (error) {
                 console.error("Request failed:", error);
-                const statusDiv = form.querySelector('.status');
-                statusDiv.innerHTML = `<p>Error: Failed to start analysis</p>`;
+                form.querySelector('.status').innerHTML = `<p style="color: #ff6b6b;">Error: Failed to start analysis</p>`;
+            } finally {
+                isAnalyzing = false; // Reset the flag when analysis is done
+                analyzeButtons.forEach(button => button.disabled = false); // Re-enable all Analyze buttons
             }
         }
     </script>
-</head>
-<body>
-    <div class="container">
-        <div class="profile-section">
-            <div class="profile-info">
-                <img src="{{ user.avatar_url }}" alt="User Avatar">
-                <h1>Welcome, {{ user.name or user.username }}</h1>
-            </div>
-            <a href="{{ url_for('logout') }}" class="logout-button">Logout</a>
-        </div>
-        
-        <h2>Your Repositories</h2>
-        
-        {% if repos %}
-            <ul class="repo-list">
-                {% for repo in repos %}
-                    <li class="repo-item">
-                        <a href="{{ repo.html_url }}" target="_blank" class="repo-link">{{ repo.name }}</a>
-                        <form action="{{ url_for('analyze_repo') }}" method="post" onsubmit="event.preventDefault(); analyzeRepo(this);">
-                            <input type="hidden" name="repo_url" value="{{ repo.clone_url }}">
-                            <button type="submit" class="analyze-button">Analyze</button>
-                            <div class="status"></div>
-                        </form>
-                    </li>
-                {% endfor %}
-            </ul>
-        {% else %}
-            <p>No repositories found.</p>
-        {% endif %}
-    </div>
 </body>
 </html>
